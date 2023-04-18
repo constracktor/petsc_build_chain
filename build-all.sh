@@ -88,6 +88,10 @@ mkdir -p ${SOURCE_ROOT} ${INSTALL_ROOT}
 ################################################################################
 # Build tools
 ################################################################################
+echo "Building CMake"
+./build-cmake.sh
+export CMAKE_COMMAND=${INSTALL_ROOT}/cmake/bin/cmake
+
 # Build Compiler and set Compiler Environment Variables
 if [[ "${PETSC_COMPILER_OPTION}" == "with-gcc" ]]; then
     echo "Building GCC"
@@ -95,9 +99,6 @@ if [[ "${PETSC_COMPILER_OPTION}" == "with-gcc" ]]; then
     echo "Configuring self-built GCC"
     source gcc-config.sh
 elif [[ "${PETSC_COMPILER_OPTION}" == "with-clang" ]]; then
-    echo "Building CMake"
-    ./build-cmake.sh
-    export CMAKE_COMMAND=${INSTALL_ROOT}/cmake/bin/cmake
     echo "Building clang"
     ./build-clang.sh
     echo "Configuring self-built clang"

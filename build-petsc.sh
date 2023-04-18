@@ -42,6 +42,6 @@ fi
     #--with-clanguage=cxx
     #--with-fc=0 
     #--download-f2cblaslapack 
-    ${PYTHONPATH} configure --prefix=${INSTALL_ROOT}/petsc --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --download-cmake ${OPTIONAL_PACKAGES}
+    ${PYTHONPATH} configure --prefix=${INSTALL_ROOT}/petsc --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --with-cmake-dir=${INSTALL_ROOT}/cmake/bin ${OPTIONAL_PACKAGES}
     make all check
 )

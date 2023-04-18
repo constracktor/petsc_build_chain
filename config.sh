@@ -4,6 +4,9 @@ export SOURCE_ROOT=${PETSC_ROOT}/../src
 ################################################################################
 # Package Configuration
 ################################################################################
+# CMake
+export CMAKE_VERSION=3.19.5
+
 # GCC
 export GCC_VERSION=10.3.0
 # specific version of system GCC
