@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-: ${SOURCE_ROOT:?} ${INSTALL_ROOT:?} ${PETSC_VERSION:?} ${PYTHONPATH:?} ${BUILD_TYPE:?}
+: ${SOURCE_ROOT:?} ${INSTALL_ROOT:?} ${PETSC_VERSION:?} ${PYTHONPATH:?} ${BUILD_TYPE:?} ${PETSC_WITH_MKL}
 
 DIR_SRC=${SOURCE_ROOT}/petsc
 
@@ -24,20 +24,24 @@ if [[ ! -d ${DIR_SRC} ]]; then
 fi
 
 (
+    cd ${DIR_SRC}
+    # configure PETSc
+    if [[ "${PETSC_WITH_MKL}" == "ON" ]]; then
+        BLAS_LAPACK_LIB="--with-blas-lapack-dir=${INSTALL_ROOT}/mkl/mkl/2023.0.0/lib/intel64"
+    else
+        BLAS_LAPACK_LIB="--download-fblaslapack"
+    fi
+
     OPTIONAL_PACKAGES="--download-elemental --download-metis --download-parmetis"
-    BLAS_LAPACK_LIB="--download-f2cblaslapack"
-    #BLAS_LAPACK_LIB="--with-blas-lapack-dir=${INSTALL_ROOT}/mkl/mkl/2023.0.0/lib/intel64"
     MPI_LIB="--download-openmpi"
     #MPI_LIB=--with-mpi-dir=$HOME/build
 
-    # configure to use fblaslapack for BLAS and LAPACK
-    #${PYTHONPATH} configure --with-debugging=${DEBUGGING} --with-cc=gcc --with-fc=gfortran --with-cxx=g++ --with-clanguage=cxx --download-openmpi --download-fblaslapack --download-elemental --download-metis --download-parmetis --download-cmake && make all check
-    # configure to use f2cblaslapack for BLAS and LAPACK without fortran
-    #${PYTHONPATH} configure --with-debugging=${DEBUGGING} --with-cc=gcc --with-fc=0 --with-cxx=g++ --with-clanguage=cxx --download-openmpi --download-f2cblaslapack --download-elemental --download-metis --download-parmetis --download-cmake && make all check
-    # configure to use MKL for BLAS and LAPACK
-    #${PYTHONPATH} configure --with-debugging=${DEBUGGING} --with-cc=gcc --with-fc=gfortran --with-cxx=g++ --with-clanguage=cxx --download-openmpi --with-blas-lapack-dir=${INSTALL_ROOT}/mkl/mkl/2023.0.0/lib/intel64 --download-elemental --download-metis --download-parmetis --download-cmake && make all check
-    # NOTE: install on ipvsmisc not ipvs-epyc1
-    # configure to use fblaslapack for BLAS and LAPACK and own OpenMPI
-    #${PYTHONPATH} configure --with-fc=0 --with-language=cxx --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --download-cmake ${OPTIONAL_PACKAGES} && make all check
-    ${PYTHONPATH} configure --prefix=${INSTALL_ROOT}/petsc --with-fc=0 --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --download-cmake ${OPTIONAL_PACKAGES} && make all check
+    #--with-cc=gcc 
+    #--with-fc=gfortran
+    #--with-cxx=g++ 
+    #--with-clanguage=cxx
+    #--with-fc=0 
+    #--download-f2cblaslapack 
+    ${PYTHONPATH} configure --prefix=${INSTALL_ROOT}/petsc --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --download-cmake ${OPTIONAL_PACKAGES}
+    make all check
 )

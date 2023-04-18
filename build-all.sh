@@ -8,6 +8,8 @@ print_usage_abort ()
     cat <<EOF >&2
 SYNOPSIS
     ${0} {Release|Debug}
+    {with-gcc|with-clang|with-CC|with-CC-clang}
+    {with-mkl|without-mkl}
 DESCRIPTION
     Download, configure, build, and install PETSc and its dependencies.
 EOF
@@ -15,8 +17,15 @@ EOF
 }
 
 ################################################################################
+# Diagnostics
+################################################################################
+set -e
+set -x
+
+################################################################################
 # Command-line options
 ################################################################################
+# Determine build type
 if [[ "$1" == "Release" || "$1" == "Debug" ]]
 then
     export BUILD_TYPE=$1
@@ -27,11 +36,40 @@ else
     print_usage_abort
 fi
 
-################################################################################
-# Diagnostics
-################################################################################
-set -e
-set -x
+# Determine compiler
+if [[ "$2" == "with-gcc" ]]; then
+    export PETSC_USE_CC_COMPILER=OFF
+    export PETSC_WITH_CLANG=OFF
+    echo "Using self-built gcc"
+elif [[ "$2" == "with-clang" ]]; then
+    export PETSC_USE_CC_COMPILER=OFF
+    export PETSC_WITH_CLANG=ON
+    echo "Using self-built clang "
+elif [[ "$2" == "with-CC" ]]; then
+    export PETSC_USE_CC_COMPILER=ON
+    export PETSC_WITH_CLANG=OFF
+    echo "Using CC / CXX compiler (but expecting it to be some kind of gcc)"
+elif [[ "$2" == "with-CC-clang" ]]; then
+    export PETSC_USE_CC_COMPILER=ON
+    export PETSC_WITH_CLANG=ON
+    echo "Using CC / CXX compiler (but expecting it to be some kind of clang)"
+else
+    echo 'Compiler must be specified with "with-gcc" or "with-clang" or "with-CC" or "with-CC-clang"' >&2
+    print_usage_abort
+fi
+export PETSC_COMPILER_OPTION="$2"
+
+# Determine BLAS backend
+if [[ "$3" == "without-mkl" ]]; then
+    export PETSC_WITH_MKL=OFF
+    echo "MKL Backend: Disabled - use fblaslapack"
+elif [[ "$3" == "with-mkl" ]]; then
+    export PETSC_WITH_MKL=ON
+    echo "MKL Backend: Enabled"
+else
+    echo 'BLAS backend must be specified and has to be "with-mkl" or "without-mkl"' >&2
+    print_usage_abort
+fi
 
 ################################################################################
 # Configuration
@@ -50,11 +88,29 @@ mkdir -p ${SOURCE_ROOT} ${INSTALL_ROOT}
 ################################################################################
 # Build tools
 ################################################################################
-#echo "Building GCC"
-#./build-gcc.sh
+# Build Compiler and set Compiler Environment Variables
+if [[ "${PETSC_COMPILER_OPTION}" == "with-gcc" ]]; then
+    echo "Building GCC"
+    ./build-gcc.sh
+    echo "Configuring self-built GCC"
+    source gcc-config.sh
+elif [[ "${PETSC_COMPILER_OPTION}" == "with-clang" ]]; then
+    echo "Building clang"
+    ./build-clang.sh
+    echo "Configuring self-built clang"
+    source clang-config.sh
+elif [[ "${PETSC_COMPILER_OPTION}" == "with-CC" ]]; then
+    echo "Configuring GCC"
+    source gcc-config.sh
+elif [[ "${PETSC_COMPILER_OPTION}" == "with-CC-clang" ]]; then
+    echo "Configuring clang"
+    source clang-config.sh
+fi
 
-echo "Building MKL"
-#./build-mkl.sh
+if [[ "${PETSC_WITH_MKL}" == "ON" ]]; then
+    echo "Building MKL"
+    ./build-mkl.sh
+fi
 
 echo "Building Python"
 ./build-python.sh

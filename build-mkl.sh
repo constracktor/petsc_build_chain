@@ -20,4 +20,5 @@ fi
     cd ${DIR_SRC}
     chmod +x ./l_onemkl_p_${MKL_VERSION}.25398_offline.sh
     ./l_onemkl_p_${MKL_VERSION}.25398_offline.sh -a --silent --install-dir=${DIR_INSTALL} --eula=accept --intel-sw-improvement-program-consent=decline
+    cd $HOME rm -rf intel lib
 )
