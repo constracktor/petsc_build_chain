@@ -29,7 +29,7 @@ fi
     if [[ "${PETSC_WITH_MKL}" == "ON" ]]; then
         BLAS_LAPACK_LIB="--with-blas-lapack-dir=${INSTALL_ROOT}/mkl/mkl/2023.0.0/lib/intel64"
     else
-        BLAS_LAPACK_LIB="--download-fblaslapack"
+        BLAS_LAPACK_LIB="--download-f2cblaslapack"
     fi
 
     OPTIONAL_PACKAGES="--download-elemental --download-metis --download-parmetis"
@@ -42,6 +42,6 @@ fi
     #--with-clanguage=cxx
     #--with-fc=0 
     #--download-f2cblaslapack 
-    ${PYTHONPATH} configure --prefix=${INSTALL_ROOT}/petsc --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --with-cmake-dir=${INSTALL_ROOT}/cmake/bin ${OPTIONAL_PACKAGES}
+    ${PYTHONPATH} configure --with-fc=0 --prefix=${INSTALL_ROOT}/petsc --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --with-cmake-dir=${INSTALL_ROOT}/cmake/bin ${OPTIONAL_PACKAGES}
     make all check
 )
