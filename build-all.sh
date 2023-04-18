@@ -95,6 +95,9 @@ if [[ "${PETSC_COMPILER_OPTION}" == "with-gcc" ]]; then
     echo "Configuring self-built GCC"
     source gcc-config.sh
 elif [[ "${PETSC_COMPILER_OPTION}" == "with-clang" ]]; then
+    echo "Building CMake"
+    ./build-cmake.sh
+    export CMAKE_COMMAND=${INSTALL_ROOT}/cmake/bin/cmake
     echo "Building clang"
     ./build-clang.sh
     echo "Configuring self-built clang"
