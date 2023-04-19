@@ -43,5 +43,6 @@ fi
     #--with-fc=0 
     #--download-f2cblaslapack 
     ${PYTHONPATH} configure --with-fc=0 --prefix=${INSTALL_ROOT}/petsc --with-debugging=${DEBUGGING} ${MPI_LIB} ${BLAS_LAPACK_LIB} --with-cmake-dir=${INSTALL_ROOT}/cmake/bin ${OPTIONAL_PACKAGES}
-    make all check
+    make -j${PARALLEL_BUILD} all check
+    make install
 )
